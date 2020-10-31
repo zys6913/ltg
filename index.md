@@ -1,37 +1,266 @@
-## Welcome to GitHub Pages
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SaoLei</title>
+<style type="text/css">
+table
+{
+-webkit-touch-callout: none; /* iOS Safari */
 
-You can use the [editor on GitHub](https://github.com/zys6913/ltg/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+-webkit-user-select: none; /* Chrome/Safari/Opera */
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+-khtml-user-select: none; /* Konqueror */
 
-### Markdown
+-moz-user-select: none; /* Firefox */
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+-ms-user-select: none; /* Internet Explorer/Edge */
 
-```markdown
-Syntax highlighted code block
+user-select: none; /* Non-prefixed version, currently not supported by any browser */
+}
+</style>
+</head>
 
-# Header 1
-## Header 2
-### Header 3
+<body>
+<center style="margin:150px auto;">
+<h2 style="font-family:Comic Sans Ms;">Mine Clearance（扫雷）&diams;</h2>
+<p>请设置行和列开始游戏</p>
+<p>游戏难度：<select id="level" onchange="changelevel()"><option>小白级</option><option>大神级</option></select></p>
+<p id="select_level"></p>
+行:  <input type="text" id="rows"> 
+列: <input type="text" id="cols"> 
+<button id="add" onClick="add()">PlayGame</button>
+<br>
+<p id="tips"></p>
+<p id="leiNum"></p>
+<table border="2" id="tab"  ></table>
+<p id="GScore"></p>
 
-- Bulleted
-- List
+</center>
 
-1. Numbered
-2. List
+<script type="text/javascript">
 
-**Bold** and _Italic_ and `Code` text
+	var  lei =new Array("&hearts;","0","&hearts;","&hearts;","&hearts;","&hearts;");
+	var tab =$("tab");
+	var GScore=$("GScore");
+	var score=0;
+	var tip=$("tips");
+	var time;
+	var i=3;
+	var row =$("rows");
+	var col =$("cols");
+	var Total=0;
+	var lei_count =0;
+	var levels= $("level");
+	var select_level=$("select_level");
 
-[Link](url) and ![Image](src)
-```
+	function add()
+	{
+		clear();
+		tip.innerHTML="游戏开始";
+		score=0;
+		GScore.innerHTML="当前得分："+score;
+	    lei_count=0;
+		tab.innerHTML="";
+		Total=0;
+		Total=parseInt(row.value)*parseInt(col.value);
+		for(var i=0;i<row.value;i++)
+		{
+			var newTr =document.createElement("tr");
+			newTr.id=i;//
+			newTr.style.background="black";
+			for(var j=0;j<col.value;j++)
+			{//
+				var rand=parseInt(Math.random()*lei.length);
+				newTr.innerHTML+="<td ><button id='"+i+","+j+"' style ='width:25px;height:25px;background:green; color:green; border:1px blue solid' onclick='myclick(this)' onmouseover='changecolor(this)' onmouseout='resetcolor(this)'>"+lei[rand]+"</button></td>";
+				if(lei[rand]=="0")
+				{
+					lei_count++;
+				}
+			}
+			tab.appendChild(newTr);
+		}
+		Total=Total-lei_count;
+		var leinum =$("leiNum");
+		leinum.innerHTML="本局雷数："+lei_count;
+	}
+		
+		function $(id)
+		{
+			return document.getElementById(id);
+		}
+	
+	function change(obj)
+	{
+	
+		if(obj.innerHTML=="0")
+			{
+				time=setInterval(times,1000);
+				obj.style.backgroundColor="red";
+				obj.innerHTML="💀";
+				alert("Game Over!");
+				
+			}else
+			{
+				obj.style.backgroundColor="white";
+				score=score+1;
+			}
+			GScore.innerHTML="当前得分："+score;
+	}
+	
+	function myclick(obj)
+	{
+		if(obj.style.background!="white")
+		{
+		change(obj);
+		check(obj);
+		Total--;
+		if(Total==0)
+		{
+		alert("你赢了！总分："+score);
+		}
+		
+		}
+	}
+	
+	
+	function changecolor(obj)
+	{
+		obj.style.border="1px  red solid ";
+	}
+	function resetcolor(obj)
+	{
+		obj.style.border="1px blue solid";
+	}
+	function times()
+	{
+		
+		tip.innerHTML="游戏结束，"+i+"秒后重新开始游戏";
+		if(i==0)
+		{
+			add();
+		}
+		i--;
+	}
+	function clear()
+	{
+		clearInterval(time);
+		i=3;
+	}
+	
+	function check(obj)
+	{
+		var index=0;
+		var len =obj.id.split(",");
+		index=Number(len[1]);//下标
+		var boom =0;
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+		//左节点
+		if(index-1>=0)
+		{
+			if(obj.parentNode.previousSibling.childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.previousSibling.childNodes[0].style.background="black";
+			}
+		}
+		//右节点
+		if(index!=Number(col.value)-1){
+			if(obj.parentNode.nextSibling.childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.nextSibling.childNodes[0].style.background="black";
+			}
+		}
+		//上节点
+		if(obj.parentNode.parentNode.id!="0"){
+			if(obj.parentNode.parentNode.previousSibling.childNodes[index].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.previousSibling.childNodes[index].childNodes[0].style.background="black";
+			}
+		}
+		//下节点
+		if(obj.parentNode.parentNode.id!=Number(row.value)-1){
+			if(obj.parentNode.parentNode.nextSibling.childNodes[index].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.nextSibling.childNodes[index].childNodes[0].style.background="black";
+			}
+		}
+	
+		//左上节点
+		if(index-1>=0 && obj.parentNode.parentNode.id!="0"){
+			if(obj.parentNode.parentNode.previousSibling.childNodes[index-1].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.previousSibling.childNodes[index-1].childNodes[0].style.background="black";
+			}
+		}
+		
+		//右上节点
+		if(index!=Number(col.value)-1 && obj.parentNode.parentNode.id!="0"){
+			if(obj.parentNode.parentNode.previousSibling.childNodes[index+1].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.previousSibling.childNodes[index+1].childNodes[0].style.background="black";
+			}
+		}
+		//左下节点
+		if(index-1>=0 && obj.parentNode.parentNode.id!=Number(row.value)-1){
+			if(obj.parentNode.parentNode.nextSibling.childNodes[index-1].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.nextSibling.childNodes[index-1].childNodes[0].style.background="black";
+			}
+		}
+		//右下节点
+		if(index!=Number(col.value)-1  && obj.parentNode.parentNode.id!=Number(row.value)-1){
+			if(obj.parentNode.parentNode.nextSibling.childNodes[index+1].childNodes[0].innerHTML=="0")
+			{
+			boom++;
+			if(levels.value=="小白级")
+			obj.parentNode.parentNode.nextSibling.childNodes[index+1].childNodes[0].style.background="black";
+			}
+		}
+ 
+ if(boom>0)
+		obj.innerHTML=boom;
+else
+obj.innerHTML="&nbsp;";
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/zys6913/ltg/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+	}
+	
+	
+	function changelevel()
+	{
+		var info=levels.value;
+		if(levels.value=="小白级")
+		{
+			info+="&nbsp;(自动排雷)"+"💀";
+		}
+		else
+		{
+			info+="💀💀💀";
+		}
 
-### Support or Contact
+		select_level.innerHTML="你已选择："+info;
+	}
+		
+	window.onload=changelevel;
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+	</script>
+	}
+	
+</body>
+</html>
+
+
